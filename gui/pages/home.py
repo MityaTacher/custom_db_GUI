@@ -14,13 +14,13 @@ class HomePage(ctk.CTkFrame):
         open_existing_label = ctk.CTkLabel(self, text="Открыть существующий")
         open_existing_label.grid(column=0, row=1, columnspan=1, rowspan=1)
 
-        open_existing_button = ctk.CTkButton(self, text="Выберите файл", command=lambda: self.open_file())
+        open_existing_button = ctk.CTkButton(self, text="Выберите файл", command=self.open_file)
         open_existing_button.grid(column=0, row=2, columnspan=1, rowspan=1)
 
         create_new_label = ctk.CTkLabel(self, text="Создать новый")
         create_new_label.grid(column=2, row=1, columnspan=1, rowspan=1)
 
-        create_new_button = ctk.CTkButton(self, text="Выберите файл", command=lambda: self.open_file(create_new=1))
+        create_new_button = ctk.CTkButton(self, text="Выберите файл", command=lambda: self.open_file(create_new=True))
         create_new_button.grid(column=2, row=2, columnspan=1, rowspan=1)
 
     def refresh(self):

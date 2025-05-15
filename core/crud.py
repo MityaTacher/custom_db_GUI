@@ -5,6 +5,10 @@ def get_connection(db_path='test.db'):
     return sqlite3.connect(db_path)
 
 
+def close_connection(conn: sqlite3.Connection):
+    conn.close()
+
+
 def create_table(conn, table_name: str, columns: dict):
     cursor = conn.cursor()
 
@@ -21,9 +25,9 @@ def insert_row(conn, table_name: str, values: dict):
 
     columns = ', '.join(values.keys())
     placeholders = ', '.join(['?'] * len(values))
-    sqline = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders});"
-    print(sqline)
-    cursor.execute(sqline, list(values.values()))
+    sql_query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders});"
+    print(sql_query)
+    cursor.execute(sql_query, list(values.values()))
     conn.commit()
 
 
@@ -50,30 +54,30 @@ def get_column_names(conn, table_name):
 
 def change_value(conn, table_name, heading, value, id):
     cursor = conn.cursor()
-    sqline = f'UPDATE {table_name} SET {heading} = ? WHERE id = ?'
-    cursor.execute(sqline, (value, id))
+    sql_query = f'UPDATE {table_name} SET {heading} = ? WHERE id = ?'
+    cursor.execute(sql_query, (value, id))
     conn.commit()
 
 
 def rename_header(conn, table_name, old_name, new_name):
     cursor = conn.cursor()
-    sqline = f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}"'
-    cursor.execute(sqline)
+    sql_query = f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}"'
+    cursor.execute(sql_query)
     conn.commit()
 
 
 def new_header(conn, table_name, name):
     cursor = conn.cursor()
     number_columns = len(get_column_names(conn, table_name))
-    sqline = f'ALTER TABLE {table_name} ADD COLUMN {name}{number_columns} TEXT'
-    cursor.execute(sqline)
+    sql_query = f'ALTER TABLE {table_name} ADD COLUMN {name}{number_columns} TEXT'
+    cursor.execute(sql_query)
     conn.commit()
 
 
 def get_number_rows(conn, table_name):
     cursor = conn.cursor()
-    sqline = f'SELECT COUNT(1) FROM {table_name}'
-    cursor.execute(sqline)
+    sql_query = f'SELECT COUNT(1) FROM {table_name}'
+    cursor.execute(sql_query)
 
     return cursor.fetchall()[0][0]
 

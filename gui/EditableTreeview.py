@@ -1,16 +1,25 @@
 from tkinter import END
 from tkinter.ttk import Treeview, Entry
 
-import core.crud
-
 
 class EditableTreeview(Treeview):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master,
+                 connection=None,
+                 rename_header_func=None,
+                 change_value_func=None,
+                 insert_row_func=None,
+                 new_header_func=None,
+                 get_number_rows_func=None, **kwargs):
         super().__init__(master, **kwargs)
+        self.connection = connection
+        self.rename_header = rename_header_func
+        self.change_value = change_value_func
+        self.insert_row = insert_row_func
+        self.new_header = new_header_func
+        self.get_number_rows = get_number_rows_func
+
         self.editing_entry = None
         self.bind("<Double-1>", self.on_double_click)
-        # self.bind("<Return>", self.on_return)
-        self.lines = None
 
     def on_double_click(self, event):
         region = self.identify("region", event.x, event.y)
@@ -48,7 +57,7 @@ class EditableTreeview(Treeview):
         def on_focus_out(event):
             new_value = self.editing_entry.get()
             self.heading(value, text=new_value)
-            core.crud.rename_header(core.crud.get_connection(), 'contacts', value, new_value)
+            self.rename_header(self.connection, 'database', value, new_value)
             self.event_generate("<<NeedRefresh>>")
             self.editing_entry.destroy()
             self.editing_entry = None
@@ -66,10 +75,13 @@ class EditableTreeview(Treeview):
         x, y, width, height = self.bbox(row_id, column)
         print(f'|{row_id}|, |{column}|')
         value = self.set(row_id, column)
-        row_index = row_id[-1]
+        row_index = int(row_id[-1])
+
         if column == '#1':
             if value == '+':
                 self.add_line()
+            return
+        if row_index == self.get_number_rows(self.connection, 'database') + 1:
             return
 
         column_index = int(column[1:]) - 1
@@ -85,8 +97,8 @@ class EditableTreeview(Treeview):
         def on_focus_out(event):
             new_value = self.editing_entry.get()
             self.set(row_id, column, new_value)
-            core.crud.change_value(core.crud.get_connection(), 'contacts', column_value,
-                                   self.editing_entry.get(), row_index)
+            self.change_value(self.connection, 'database', column_value,
+                              self.editing_entry.get(), row_index)
             self.editing_entry.destroy()
             self.editing_entry = None
 
@@ -94,13 +106,11 @@ class EditableTreeview(Treeview):
         self.editing_entry.bind("<FocusOut>", on_focus_out)
 
     def add_line(self):
-        conn = core.crud.get_connection()
-        number_rows = core.crud.get_number_rows(conn, 'contacts')
-        self.insert("", number_rows, values=[number_rows+1])
-        core.crud.insert_row(conn, 'contacts', {"id": number_rows + 1})
+        number_rows = self.get_number_rows(self.connection, 'database')
+        self.insert("", number_rows, values=[number_rows + 1])
+        self.insert_row(self.connection, 'database', {"id": number_rows + 1})
         self.event_generate("<<NeedRefresh>>")
 
     def add_heading(self, name):
-        core.crud.new_header(core.crud.get_connection(), 'contacts', name)
+        self.new_header(self.connection, 'database', name)
         self.event_generate('<<NeedRefresh>>')
-
