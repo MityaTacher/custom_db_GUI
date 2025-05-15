@@ -21,9 +21,9 @@ def insert_row(conn, table_name: str, values: dict):
 
     columns = ', '.join(values.keys())
     placeholders = ', '.join(['?'] * len(values))
-    sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders});"
-    print(sql)
-    cursor.execute(sql, list(values.values()))
+    sqline = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders});"
+    print(sqline)
+    cursor.execute(sqline, list(values.values()))
     conn.commit()
 
 
@@ -46,6 +46,36 @@ def get_column_names(conn, table_name):
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM {table_name} LIMIT 1")
     return [description[0] for description in cursor.description]
+
+
+def change_value(conn, table_name, heading, value, id):
+    cursor = conn.cursor()
+    sqline = f'UPDATE {table_name} SET {heading} = ? WHERE id = ?'
+    cursor.execute(sqline, (value, id))
+    conn.commit()
+
+
+def rename_header(conn, table_name, old_name, new_name):
+    cursor = conn.cursor()
+    sqline = f'ALTER TABLE "{table_name}" RENAME COLUMN "{old_name}" TO "{new_name}"'
+    cursor.execute(sqline)
+    conn.commit()
+
+
+def new_header(conn, table_name, name):
+    cursor = conn.cursor()
+    number_columns = len(get_column_names(conn, table_name))
+    sqline = f'ALTER TABLE {table_name} ADD COLUMN {name}{number_columns} TEXT'
+    cursor.execute(sqline)
+    conn.commit()
+
+
+def get_number_rows(conn, table_name):
+    cursor = conn.cursor()
+    sqline = f'SELECT COUNT(1) FROM {table_name}'
+    cursor.execute(sqline)
+
+    return cursor.fetchall()[0][0]
 
 
 def select_all_tables(conn):

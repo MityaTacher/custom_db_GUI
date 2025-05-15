@@ -1,5 +1,7 @@
 from tkinter import filedialog
 
+import core.crud
+
 
 def open_db_file():
 
@@ -24,5 +26,12 @@ def create_db_file():
 
     if file_path:
         with open(file_path, "w"):
+            core.crud.create_table(core.crud.get_connection(), "contacts", {
+                "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+                "name": "TEXT",
+            })
+            # core.crud.insert_row(core.crud.get_connection(), 'contacts', {'id': '1'})
+            print("TABLE CREATED: ", end='')
+            print(core.crud.select_all(core.crud.get_connection(), 'contacts'))
             return file_path
     return None
