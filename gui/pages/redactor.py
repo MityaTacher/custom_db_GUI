@@ -14,7 +14,7 @@ class RedactorPage(ctk.CTkFrame):
                                     command=lambda: master.show_page("HomePage"))
         back_button.grid(column=0, row=0, columnspan=1, rowspan=1)
 
-        export_button = ctk.CTkButton(self, text="Экспорт .xlsx",
+        export_button = ctk.CTkButton(self, text="Экспорт файла",
                                       command=lambda:
                                       export_database(self.master.filename,
                                                       crud.get_column_names(self.connection, 'database'),
