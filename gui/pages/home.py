@@ -11,13 +11,13 @@ class HomePage(ctk.CTkFrame):
         self.mainframe = self.create_main_frame()
         self.create_logo()
 
-        # Два блока с кнопками
         self.create_action_block(
             parent=self.mainframe,
             column=0,
             title="Открыть существующий",
             button_text="Выберите файл",
-            command=self.open_file
+            command=self.open_file,
+            padx=20
         )
         self.create_action_block(
             parent=self.mainframe,
@@ -49,7 +49,7 @@ class HomePage(ctk.CTkFrame):
         welcome_label = ctk.CTkLabel(self.mainframe, image=logo_image, text="")
         welcome_label.grid(column=0, row=0, columnspan=2, padx=20, pady=20)
 
-    def create_action_block(self, parent, column, title, button_text, command, padx=20):
+    def create_action_block(self, parent, column, title, button_text, command, padx):
         frame = ctk.CTkFrame(parent)
         frame.grid(column=column, row=1, padx=padx, pady=20, sticky='')
 

@@ -8,6 +8,7 @@ class App(ctk.CTk):
         super().__init__()
 
         self.geometry("1000x540")
+        self.resizable(False, False)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 

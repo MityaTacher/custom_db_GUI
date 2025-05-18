@@ -1,5 +1,38 @@
 from tkinter import END
-from tkinter.ttk import Treeview, Entry
+from tkinter.ttk import Treeview, Entry, Style
+from gui.widgets.CustomEntry import style_entry
+
+
+def style_treeview():
+    style = Style()
+    style.theme_use("default")
+
+    style.configure("Treeview",
+                    background="#2b2b2b",
+                    foreground="white",
+                    rowheight=30,
+                    fieldbackground="#2b2b2b",
+                    bordercolor="#444444",
+                    borderwidth=1,
+                    font=("Segoe UI", 12),
+                    relief="solid"
+                    )
+
+    style.configure("Treeview.Heading",
+                    background="#1f1f1f",
+                    foreground="white",
+                    font=("Segoe UI", 13, "bold")
+                    )
+
+    style.map("Treeview.Heading",
+              background=[("active", "#7ec5fc")],
+              foreground=[("active", "black")]
+              )
+
+    style.map("Treeview",
+              background=[("selected", "#1f6aa5")],
+              foreground=[("selected", "white")]
+              )
 
 
 class EditableTreeview(Treeview):
@@ -11,6 +44,9 @@ class EditableTreeview(Treeview):
                  new_header_func=None,
                  get_number_rows_func=None, **kwargs):
         super().__init__(master, **kwargs)
+
+        self.entry_style = style_entry()
+
         self.connection = connection
         self.rename_header = rename_header_func
         self.change_value = change_value_func
@@ -47,7 +83,11 @@ class EditableTreeview(Treeview):
             return
         x, y, width, height = self.heading_bbox(column)
 
-        self.editing_entry = Entry(self)
+        self.editing_entry = Entry(
+            self,
+            style=self.entry_style["style"],
+            font=self.entry_style["font"]['heading']
+        )
         self.editing_entry.insert(0, value)
         self.editing_entry.select_range(0, END)
         self.editing_entry.focus()
@@ -87,7 +127,11 @@ class EditableTreeview(Treeview):
         column_index = int(column[1:]) - 1
         column_value = self["columns"][column_index]
 
-        self.editing_entry = Entry(self)
+        self.editing_entry = Entry(
+            self,
+            style=self.entry_style["style"],
+            font=self.entry_style["font"]['cell']
+        )
         self.editing_entry.insert(0, value)
         self.editing_entry.select_range(0, END)
         self.editing_entry.focus()
