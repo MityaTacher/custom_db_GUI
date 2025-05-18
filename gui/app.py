@@ -4,8 +4,9 @@ from gui.pages.redactor import RedactorPage
 
 
 class App(ctk.CTk):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.filename = ''
 
         self.geometry("1000x540")
         self.resizable(False, False)
@@ -23,11 +24,8 @@ class App(ctk.CTk):
 
         self.show_page("HomePage")
 
-    def show_page(self, page_name):
-        # for page in self.pages.values():
-        #     page.grid_remove()
+    def show_page(self, page_name: str) -> None:
         page = self.pages[page_name]
         if hasattr(page, "refresh"):
             page.refresh()
         page.tkraise()
-

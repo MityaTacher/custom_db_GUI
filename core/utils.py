@@ -4,7 +4,7 @@ import csv
 from core.crud import create_table, get_connection
 
 
-def open_db_file():
+def open_db_file() -> str | None:
 
     file_path = filedialog.askopenfilename(
         title="Откройте файл базы данных .db",
@@ -17,7 +17,7 @@ def open_db_file():
     return file_path
 
 
-def create_db_file():
+def create_db_file() -> str | None:
     file_path = filedialog.asksaveasfilename(
         defaultextension=".db",
         filetypes=[("SQLite database", "*.db")],
@@ -36,13 +36,13 @@ def create_db_file():
     return file_path
 
 
-def export_database(full_dir: str, headers: list, data: list):
+def export_database(full_dir: str, headers: list[str], data: list[list[str | int]]) -> None:
     filename = full_dir.split("/")[-1][:-3]
-    dir = full_dir[:-len(filename)-3]
+    initialdir = full_dir[:-len(filename) - 3]
     file_path = filedialog.asksaveasfilename(defaultextension='.xlsx',
                                              filetypes=[("Книга Exel", "*.xlsx"), ('csv', "*.csv")],
                                              title="Экспорт .xlsx",
-                                             initialdir=dir,
+                                             initialdir=initialdir,
                                              initialfile=filename,
                                              confirmoverwrite=False)
     if not file_path:
@@ -58,7 +58,7 @@ def export_database(full_dir: str, headers: list, data: list):
         print(f'cannot save, unknown type: {filetype}')
 
 
-def export_xlsx(file_path: str, data: list):
+def export_xlsx(file_path: str, data: list[str]) -> None:
     wb = Workbook()
     ws = wb.active
     ws.title = "Database"
@@ -70,9 +70,7 @@ def export_xlsx(file_path: str, data: list):
     wb.close()
 
 
-def export_csv(file_path: str, data: list):
+def export_csv(file_path: str, data: list[str]) -> None:
     with open(file_path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.writer(f)
         writer.writerows(data)
-
-

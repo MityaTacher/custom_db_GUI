@@ -1,9 +1,16 @@
 from tkinter import END
 from tkinter.ttk import Treeview, Entry, Style
+
 from gui.widgets.CustomEntry import style_entry
 
+from typing import TYPE_CHECKING, Tuple
 
-def style_treeview():
+if TYPE_CHECKING:
+    import customtkinter as ctk
+    import tkinter as tk
+
+
+def style_treeview() -> None:
     style = Style()
     style.theme_use("default")
 
@@ -36,7 +43,7 @@ def style_treeview():
 
 
 class EditableTreeview(Treeview):
-    def __init__(self, master,
+    def __init__(self, master: 'ctk.CTkFrame',
                  connection=None,
                  rename_header_func=None,
                  change_value_func=None,
@@ -57,7 +64,7 @@ class EditableTreeview(Treeview):
         self.editing_entry = None
         self.bind("<Double-1>", self.on_double_click)
 
-    def on_double_click(self, event):
+    def on_double_click(self, event: 'tk.Event') -> None:
         region = self.identify("region", event.x, event.y)
         print(region)
         if region == "cell":
@@ -65,13 +72,13 @@ class EditableTreeview(Treeview):
         elif region == 'heading':
             self.edit_heading(event)
 
-    def heading_bbox(self, column):
+    def heading_bbox(self, column: str) -> Tuple[int, int, int, int]:
         x, _, width, _ = self.bbox('I001', column)
         y = 0
         height = 25
         return x, y, width, height
 
-    def edit_heading(self, event):
+    def edit_heading(self, event: 'tk.Event') -> None:
         column = self.identify_column(event.x)
         column_index = int(column[1:]) - 1
 
@@ -94,7 +101,7 @@ class EditableTreeview(Treeview):
 
         self.editing_entry.place(x=x, y=y, width=width, height=height)
 
-        def on_focus_out(event):
+        def on_focus_out(_event: 'tk.Event') -> None:
             new_value = self.editing_entry.get()
             self.heading(value, text=new_value)
             self.rename_header(self.connection, 'database', value, new_value)
@@ -105,7 +112,7 @@ class EditableTreeview(Treeview):
         self.editing_entry.bind("<Return>", on_focus_out)
         self.editing_entry.bind("<FocusOut>", on_focus_out)
 
-    def edit_cell(self, event):
+    def edit_cell(self, event: 'tk.Event') -> None:
         row_id = self.identify_row(event.y)
         column = self.identify_column(event.x)
 
@@ -138,7 +145,7 @@ class EditableTreeview(Treeview):
 
         self.editing_entry.place(x=x, y=y, width=width, height=height)
 
-        def on_focus_out(event):
+        def on_focus_out(_event: 'tk.Event') -> None:
             new_value = self.editing_entry.get()
             self.set(row_id, column, new_value)
             self.change_value(self.connection, 'database', column_value,
@@ -149,12 +156,12 @@ class EditableTreeview(Treeview):
         self.editing_entry.bind("<Return>", on_focus_out)
         self.editing_entry.bind("<FocusOut>", on_focus_out)
 
-    def add_line(self):
+    def add_line(self) -> None:
         number_rows = self.get_number_rows(self.connection, 'database')
         self.insert("", number_rows, values=[number_rows + 1])
         self.insert_row(self.connection, 'database', {"id": number_rows + 1})
         self.event_generate("<<NeedRefresh>>")
 
-    def add_heading(self, name):
+    def add_heading(self, name: str) -> None:
         self.new_header(self.connection, 'database', name)
         self.event_generate('<<NeedRefresh>>')

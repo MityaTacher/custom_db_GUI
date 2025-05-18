@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/custom_bd_GUI.iml" filepath="$PROJECT_DIR$/.idea/custom_bd_GUI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/custom_db_GUI.iml" filepath="$PROJECT_DIR$/.idea/custom_db_GUI.iml" />
     </modules>
   </component>
 </project>

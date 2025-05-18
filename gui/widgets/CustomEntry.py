@@ -2,7 +2,7 @@ from tkinter.ttk import Style
 from tkinter.font import Font
 
 
-def style_entry():
+def style_entry() -> dict[str, str | dict[str, str]]:
     style = Style()
     style.theme_use("default")
 

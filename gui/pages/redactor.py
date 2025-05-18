@@ -3,10 +3,17 @@ from core import crud
 from gui.widgets.EditableTreeview import EditableTreeview, style_treeview
 from core.utils import export_database
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from gui.app import App
+
 
 class RedactorPage(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master: 'App', **kwargs):
         super().__init__(master, **kwargs)
+
+        self.master: 'App' = master
 
         style_treeview()
 
@@ -14,36 +21,47 @@ class RedactorPage(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.mainframe = self.create_main_frame()
 
-        self.create_buttons_block(master=master)
+        self.create_buttons_block()
 
         self.tree = EditableTreeview(self, self.mainframe)
         self.connection = None
 
-    def create_buttons_block(self, master):
+    def create_buttons_block(self) -> None:
         buttons_frame = ctk.CTkFrame(self.mainframe)
         buttons_frame.grid_rowconfigure(0, weight=1)
         buttons_frame.grid_columnconfigure((0, 1), weight=1)
         buttons_frame.grid(column=0, row=0, pady=(20, 10), padx=20, columnspan=2, sticky='nsew')
 
-        back_button = ctk.CTkButton(buttons_frame, text="Назад на главную",
-                                    command=lambda: master.show_page("HomePage"))
+        back_button = ctk.CTkButton(buttons_frame,
+                                    text="Назад на главную",
+                                    font=("Segoe UI", 14),
+                                    border_width=1,
+                                    border_spacing=5,
+                                    border_color='white',
+                                    command=lambda: self.master.show_page("HomePage"))
+
         back_button.grid(column=0, row=0, columnspan=1, rowspan=1)
 
-        export_button = ctk.CTkButton(buttons_frame, text="Экспорт файла",
+        export_button = ctk.CTkButton(buttons_frame,
+                                      text="Экспорт файла",
+                                      font=("Segoe UI", 14),
+                                      border_width=1,
+                                      border_spacing=5,
+                                      border_color='white',
                                       command=lambda:
                                       export_database(self.master.filename,
                                                       crud.get_column_names(self.connection, 'database'),
                                                       crud.select_all(self.connection, 'database')))
         export_button.grid(column=1, row=0, columnspan=1, rowspan=1)
 
-    def create_main_frame(self):
+    def create_main_frame(self) -> ctk.CTkFrame:
         mainframe = ctk.CTkFrame(self)
         mainframe.grid_columnconfigure((0, 1), weight=1)
         mainframe.grid_rowconfigure((0, 1), weight=1)
         mainframe.grid(column=0, row=0, padx=20, pady=20, sticky='nsew')
         return mainframe
 
-    def refresh(self):
+    def refresh(self) -> None:
         self.tree.destroy()
         self.connection = None
         filepath = self.master.filename
@@ -53,7 +71,7 @@ class RedactorPage(ctk.CTkFrame):
         self.read_table(filepath)
 
     # open bd and get all sheets
-    def read_table(self, filepath):
+    def read_table(self, filepath: str) -> None:
         self.connection = crud.get_connection(filepath)
         table_names = crud.get_table_names(self.connection)
         print(table_names)
@@ -64,7 +82,7 @@ class RedactorPage(ctk.CTkFrame):
             return
 
     # open one sheet
-    def render_table(self, column_names):
+    def render_table(self, column_names: list) -> None:
         column_names.append("+")
         self.tree = EditableTreeview(self.mainframe, columns=column_names, show="headings", height=10,
                                      connection=self.connection,
@@ -82,7 +100,7 @@ class RedactorPage(ctk.CTkFrame):
 
         self.tree.grid(row=1, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
 
-    def show_all_rows(self, table_name):
+    def show_all_rows(self, table_name: str) -> None:
         for row in self.tree.get_children():
             self.tree.delete(row)
 
