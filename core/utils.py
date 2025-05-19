@@ -1,7 +1,7 @@
 from tkinter import filedialog
 from openpyxl import Workbook
 import csv
-from core.crud import create_table, get_connection
+from core.crud import create_table, get_connection, close_connection
 
 
 def open_db_file() -> str | None:
@@ -28,11 +28,13 @@ def create_db_file() -> str | None:
         return None
 
     with open(file_path, "w"):
-        create_table(get_connection(), "database", {
+        conn = get_connection(file_path)
+        create_table(conn, "database", {
             "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
             "name": "TEXT",
         })
         print("TABLE CREATED")
+        close_connection(conn)
     return file_path
 
 
@@ -40,7 +42,7 @@ def export_database(full_dir: str, headers: list[str], data: list[list[str | int
     filename = full_dir.split("/")[-1][:-3]
     initialdir = full_dir[:-len(filename) - 3]
     file_path = filedialog.asksaveasfilename(defaultextension='.xlsx',
-                                             filetypes=[("Книга Exel", "*.xlsx"), ('csv', "*.csv")],
+                                             filetypes=[("Книга Exel", "*.xlsx"), ('CSV (разделители - запятые)', "*.csv")],
                                              title="Экспорт .xlsx",
                                              initialdir=initialdir,
                                              initialfile=filename,
