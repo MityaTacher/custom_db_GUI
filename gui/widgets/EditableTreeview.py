@@ -49,7 +49,9 @@ class EditableTreeview(Treeview):
                  change_value_func=None,
                  insert_row_func=None,
                  new_header_func=None,
-                 get_number_rows_func=None, **kwargs):
+                 get_number_rows_func=None,
+                 get_headers=None,
+                 select_all=None, **kwargs):
         super().__init__(master, **kwargs)
 
         self.entry_style = style_entry()
@@ -60,9 +62,27 @@ class EditableTreeview(Treeview):
         self.insert_row = insert_row_func
         self.new_header = new_header_func
         self.get_number_rows = get_number_rows_func
+        self.get_headers = get_headers
+        self.select_all = select_all
 
         self.editing_entry = None
         self.bind("<Double-1>", self.on_double_click)
+
+    def render_headings(self, column_names: list[str]) -> None:
+        for column in column_names:
+            self.heading(column, text=column)
+        self.column("id", width=20, stretch=False)
+        self.column("+", width=20, stretch=False)
+
+    def render_rows(self, table_name: str) -> None:
+        for row in self.get_children():
+            self.delete(row)
+
+        rows = self.select_all(self.connection, table_name)
+        for row in rows:
+            row = [cell if cell is not None else '' for cell in row]
+            self.insert("", "end", values=row)
+        self.insert("", "end", values=["+"])
 
     def on_double_click(self, event: 'tk.Event') -> None:
         region = self.identify("region", event.x, event.y)
@@ -83,7 +103,7 @@ class EditableTreeview(Treeview):
         column_index = int(column[1:]) - 1
 
         value = self["columns"][column_index]
-        if value == 'id':
+        if value == 'id' or self.editing_entry is not None:
             return
         if value == '+':
             self.add_heading("new_heading")
@@ -104,10 +124,15 @@ class EditableTreeview(Treeview):
         def on_focus_out(_event: 'tk.Event') -> None:
             new_value = self.editing_entry.get()
             self.heading(value, text=new_value)
-            self.rename_header(self.connection, 'database', value, new_value)
-            self.event_generate("<<NeedRefresh>>")
-            self.editing_entry.destroy()
-            self.editing_entry = None
+            if value != new_value and new_value in self.get_headers(self.connection, 'database'):
+                self.editing_entry.focus()
+                self.editing_entry.bind("<Return>", on_focus_out)
+                self.editing_entry.bind("<FocusOut>", on_focus_out)
+            else:
+                self.rename_header(self.connection, 'database', value, new_value)
+                self.event_generate("<<NeedRefresh>>")
+                self.editing_entry.destroy()
+                self.editing_entry = None
 
         self.editing_entry.bind("<Return>", on_focus_out)
         self.editing_entry.bind("<FocusOut>", on_focus_out)
@@ -124,15 +149,15 @@ class EditableTreeview(Treeview):
         value = self.set(row_id, column)
         row_index = int(row_id[-1])
 
-        if column == '#1':
+        column_index = int(column[1:]) - 1
+        column_value = self["columns"][column_index]
+
+        if column == '#1' or column_value == '+' or self.editing_entry is not None:
             if value == '+':
                 self.add_line()
             return
         if row_index == self.get_number_rows(self.connection, 'database') + 1:
             return
-
-        column_index = int(column[1:]) - 1
-        column_value = self["columns"][column_index]
 
         self.editing_entry = Entry(
             self,

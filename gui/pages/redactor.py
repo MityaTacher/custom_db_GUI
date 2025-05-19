@@ -50,7 +50,7 @@ class RedactorPage(ctk.CTkFrame):
                                       border_color='white',
                                       command=lambda:
                                       export_database(self.master.filename,
-                                                      crud.get_column_names(self.connection, 'database'),
+                                                      crud.get_headers(self.connection, 'database'),
                                                       crud.select_all(self.connection, 'database')))
         export_button.grid(column=1, row=0, columnspan=1, rowspan=1)
 
@@ -76,9 +76,9 @@ class RedactorPage(ctk.CTkFrame):
         table_names = crud.get_table_names(self.connection)
         print(table_names)
         for sheet in table_names:
-            print(crud.get_column_names(self.connection, sheet))
-            self.render_table(crud.get_column_names(self.connection, sheet))
-            self.show_all_rows(sheet)
+            print(crud.get_headers(self.connection, sheet))
+            self.render_table(crud.get_headers(self.connection, sheet))
+            self.tree.render_rows(sheet)
             return
 
     # open one sheet
@@ -90,21 +90,11 @@ class RedactorPage(ctk.CTkFrame):
                                      change_value_func=crud.change_value,
                                      insert_row_func=crud.insert_row,
                                      new_header_func=crud.new_header,
-                                     get_number_rows_func=crud.get_number_rows)
+                                     get_number_rows_func=crud.get_number_rows,
+                                     get_headers=crud.get_headers,
+                                     select_all=crud.select_all)
         self.tree.bind("<<NeedRefresh>>", lambda event: self.refresh())
 
-        for column in column_names:
-            self.tree.heading(column, text=column)
-        self.tree.column("id", width=20, stretch=False)
-        self.tree.column("+", width=20, stretch=False)
+        self.tree.render_headings(column_names=column_names)
 
         self.tree.grid(row=1, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
-
-    def show_all_rows(self, table_name: str) -> None:
-        for row in self.tree.get_children():
-            self.tree.delete(row)
-
-        rows = crud.select_all(self.connection, table_name)
-        for row in rows:
-            self.tree.insert("", "end", values=row)
-        self.tree.insert("", "end", values=["+"])

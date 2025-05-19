@@ -42,11 +42,12 @@ def export_database(full_dir: str, headers: list[str], data: list[list[str | int
     filename = full_dir.split("/")[-1][:-3]
     initialdir = full_dir[:-len(filename) - 3]
     file_path = filedialog.asksaveasfilename(defaultextension='.xlsx',
-                                             filetypes=[("Книга Exel", "*.xlsx"), ('CSV (разделители - запятые)', "*.csv")],
+                                             filetypes=[("Книга Exel", "*.xlsx"),
+                                                        ('CSV (разделители - запятые)', "*.csv")],
                                              title="Экспорт .xlsx",
                                              initialdir=initialdir,
                                              initialfile=filename,
-                                             confirmoverwrite=False)
+                                             confirmoverwrite=True)
     if not file_path:
         return None
 
