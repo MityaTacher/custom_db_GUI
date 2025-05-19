@@ -71,7 +71,7 @@ class EditableTreeview(Treeview):
     def render_headings(self, column_names: list[str]) -> None:
         for column in column_names:
             self.heading(column, text=column)
-        self.column("id", width=20, stretch=False)
+        self.column("id", width=40, stretch=False)
         self.column("+", width=20, stretch=False)
 
     def render_rows(self, table_name: str) -> None:
@@ -79,10 +79,10 @@ class EditableTreeview(Treeview):
             self.delete(row)
 
         rows = self.select_all(self.connection, table_name)
-        for row in rows:
+        for index, row in enumerate(rows):
             row = [cell if cell is not None else '' for cell in row]
-            self.insert("", "end", values=row)
-        self.insert("", "end", values=["+"])
+            self.insert("", "end", values=row, iid=f'row{index + 1}')
+        self.insert("", "end", values=["+"], iid='add')
 
     def on_double_click(self, event: 'tk.Event') -> None:
         region = self.identify("region", event.x, event.y)
@@ -143,11 +143,13 @@ class EditableTreeview(Treeview):
 
         if not column and not row_id:
             return
+        if row_id == 'add':
+            return
 
         x, y, width, height = self.bbox(row_id, column)
         print(f'|{row_id}|, |{column}|')
         value = self.set(row_id, column)
-        row_index = int(row_id[-1])
+        row_index = int(row_id[3:])
 
         column_index = int(column[1:]) - 1
         column_value = self["columns"][column_index]
@@ -155,8 +157,6 @@ class EditableTreeview(Treeview):
         if column == '#1' or column_value == '+' or self.editing_entry is not None:
             if value == '+':
                 self.add_line()
-            return
-        if row_index == self.get_number_rows(self.connection, 'database') + 1:
             return
 
         self.editing_entry = Entry(
